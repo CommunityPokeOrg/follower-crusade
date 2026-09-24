@@ -71,9 +71,10 @@ enum PixelArt {
             for (x, ch) in row.enumerated() {
                 guard ch != ".", let color = pal[ch] else { continue }
                 color.setFill()
-                // NSBitmapImageRep y=0 is top-left of the first row we draw;
-                // we keep row order top-to-bottom and flip the texture view.
-                NSRect(x: Int(CGFloat(x) * scale), y: Int(CGFloat(y) * scale),
+                // The bitmap graphics context is unflipped (y=0 is the
+                // bottom row of the image), so grid rows are laid out
+                // bottom-to-top to land right-side up in the texture.
+                NSRect(x: Int(CGFloat(x) * scale), y: Int(CGFloat(rows.count - 1 - y) * scale),
                        width: Int(scale), height: Int(scale)).fill()
             }
         }

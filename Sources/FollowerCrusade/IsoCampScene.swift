@@ -71,10 +71,22 @@ final class IsoCampScene: SKScene, CampSceneDriving {
     private var demoPending = false
     private var usedTiles = Set<Tile>()
 
-    /// Existing nodes are center-anchored, so a soldier's feet sit ~16pt
-    /// below its position and a tower's base ~27pt below its node position.
-    private let soldierContactOffset: CGFloat = 16
-    private let towerContactOffset: CGFloat = 27
+    /// Ground-contact y of a placed node: the bottom edge of its visible
+    /// sprite — where feet, trunks and bases touch the ground. Sprites use
+    /// `position.y - size.height * anchorPoint.y`; compound nodes expose
+    /// their own `groundContactOffset`.
+    private func groundContactY(of node: SKNode) -> CGFloat {
+        if let sprite = node as? SKSpriteNode {
+            return sprite.position.y - sprite.size.height * sprite.anchorPoint.y
+        }
+        if let outpost = node as? OutpostNode {
+            return outpost.position.y - outpost.groundContactOffset
+        }
+        if let fire = node as? CampfireNode {
+            return fire.position.y - fire.groundContactOffset
+        }
+        return node.position.y
+    }
 
     // MARK: - Scene setup
 
@@ -135,7 +147,7 @@ final class IsoCampScene: SKScene, CampSceneDriving {
                 p.y += CGFloat(((j * 23 + i * 7) % 7) - 3)
                 tree.position = p
                 tree.anchorPoint = CGPoint(x: 0.5, y: 0.06) // trunk base = contact
-                tree.zPosition = zDepth(p.y)
+                tree.zPosition = zDepth(groundContactY(of: tree))
                 addChild(tree)
                 treeIndex += 1
             }
@@ -146,7 +158,7 @@ final class IsoCampScene: SKScene, CampSceneDriving {
         var firePos = screen(fireTile)
         firePos.y += 6 // logs sit on the tile top face
         fire.position = firePos
-        fire.zPosition = zDepth(firePos.y - 4)
+        fire.zPosition = zDepth(groundContactY(of: fire))
         addChild(fire)
         campfire = fire
     }
@@ -179,10 +191,10 @@ final class IsoCampScene: SKScene, CampSceneDriving {
     // MARK: - Depth sort
 
     /// Soldiers move, so their z is re-derived every frame from the
-    /// ground-contact y (feet = center-anchored position minus half height).
+    /// ground-contact y (feet = bottom edge of the sprite frame).
     override func update(_ currentTime: TimeInterval) {
         for s in soldiers {
-            s.zPosition = zDepth(s.position.y - soldierContactOffset)
+            s.zPosition = zDepth(groundContactY(of: s))
         }
     }
 
@@ -229,10 +241,10 @@ final class IsoCampScene: SKScene, CampSceneDriving {
         return p
     }
 
-    /// Where a center-anchored soldier must sit for its feet to touch t.
-    private func standingPosition(for t: Tile) -> CGPoint {
+    /// Where a sprite must sit for its ground-contact point to touch t.
+    private func standingPosition(for t: Tile, sprite: SKSpriteNode) -> CGPoint {
         var p = contactPoint(for: t)
-        p.y += soldierContactOffset
+        p.y += sprite.size.height * sprite.anchorPoint.y
         return p
     }
 
@@ -268,13 +280,13 @@ final class IsoCampScene: SKScene, CampSceneDriving {
         guard let t = formationTile(for: rank) else { return }
         usedTiles.insert(t)
         let soldier = SoldierNode(rank: rank)
-        let target = standingPosition(for: t)
+        let target = standingPosition(for: t, sprite: soldier)
         soldiers.append(soldier)
         if animated {
             // March in from just off the left (woods) flank of the board.
             var entry = screen(Tile(i: 0, j: min(rows - 1, t.j + 1)))
             entry.x -= 60
-            entry.y += soldierContactOffset
+            entry.y += soldier.size.height * soldier.anchorPoint.y
             soldier.position = entry
             addChild(soldier)
             soldier.march(to: target, speed: 40)
@@ -347,9 +359,9 @@ final class IsoCampScene: SKScene, CampSceneDriving {
                 ? outpostTiles[i]
                 : Tile(i: cols - 1 - (i % 2), j: min(rows - 1, 1 + i))
             var p = screen(t)
-            p.y += towerContactOffset // tower base sits on the tile
+            p.y += node.groundContactOffset // tower base sits on the tile
             node.position = p
-            node.zPosition = zDepth(p.y - towerContactOffset)
+            node.zPosition = zDepth(groundContactY(of: node))
             addChild(node)
             outposts[comp.id] = node
         }
@@ -364,7 +376,7 @@ final class IsoCampScene: SKScene, CampSceneDriving {
         if squad.isEmpty { node.capture(); return }
         for soldier in squad {
             let base = CGPoint(x: node.position.x + .random(in: -26...26),
-                               y: node.position.y - towerContactOffset - 6)
+                               y: node.position.y - node.groundContactOffset - 6)
             soldier.storm(to: base) {
                 pending -= 1
                 if pending <= 0 { finish() }
@@ -403,7 +415,7 @@ final class IsoCampScene: SKScene, CampSceneDriving {
             let (rank, t) = seed
             usedTiles.insert(t)
             let s = SoldierNode(rank: rank)
-            s.position = standingPosition(for: t)
+            s.position = standingPosition(for: t, sprite: s)
             addChild(s)
             soldiers.append(s)
             // De-phase the idle loops so the army doesn't bob in unison.
@@ -423,7 +435,7 @@ final class IsoCampScene: SKScene, CampSceneDriving {
             usedTiles.insert(t)
             let patrol = SoldierNode(rank: .knight)
             patrol.name = "patrol"
-            patrol.position = standingPosition(for: t)
+            patrol.position = standingPosition(for: t, sprite: patrol)
             addChild(patrol)
             soldiers.append(patrol)
             runPatrol(patrol, between: Tile(i: 3, j: 6), and: Tile(i: 9, j: 4))

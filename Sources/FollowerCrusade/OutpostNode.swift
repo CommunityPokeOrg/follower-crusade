@@ -12,6 +12,11 @@ final class OutpostNode: SKNode {
     private let label: SKLabelNode
     private(set) var captured = false
 
+    /// Distance from the node origin down to the tower's base — the line
+    /// where the outpost contacts the ground (the origin sits at the tower
+    /// sprite's center).
+    var groundContactOffset: CGFloat { tower.size.height / 2 }
+
     init(competitor: Competitor) {
         competitorID = competitor.id
         tower = SKSpriteNode(texture: PixelArt.texture(rows: Sprites.tower))

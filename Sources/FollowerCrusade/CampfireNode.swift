@@ -11,6 +11,10 @@ final class CampfireNode: SKNode {
     private let glow: SKSpriteNode
     private(set) var morale: Morale = .steady
 
+    /// Distance from the node origin down to the bottom of the stone
+    /// fire-pit — the line where the campfire contacts the ground.
+    var groundContactOffset: CGFloat { logs.size.height / 2 }
+
     override init() {
         let logTex = PixelArt.texture(rows: Sprites.logs)
         logs = SKSpriteNode(texture: logTex)
