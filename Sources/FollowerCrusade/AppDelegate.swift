@@ -20,10 +20,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // PROTOTYPE: `--iso-demo` (or FC_ISO_DEMO=1) opens a dedicated large
         // window running the isometric IsoCampScene instead of the HUD — the
         // 360x240 HUD is too small to judge depth. `--iso-shot <path>` also
-        // writes a PNG of the scene after it settles.
-        if isoDemoRequested { runIsoDemo() }
-
+        // writes a PNG of the scene after it settles. The HUD/menubar are
+        // skipped in demo mode so desktop captures stay clean.
         state = AppState()
+        if isoDemoRequested {
+            runIsoDemo()
+            return
+        }
         // `--iso` (or FC_ISO=1) swaps the HUD's flat scene for the iso
         // prototype so live metrics drive it inside the normal app chrome.
         let useIso = flag("--iso") || ProcessInfo.processInfo.environment["FC_ISO"] == "1"
