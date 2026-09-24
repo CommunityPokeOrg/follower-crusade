@@ -16,6 +16,7 @@ final class MenuBarController: NSObject {
     var onToggleHUD: () -> Void = {}
     var onOpenSettings: () -> Void = {}
     var onOpenAbout: () -> Void = {}
+    var onOpenLedger: () -> Void = {}
 
     init(state: AppState) {
         self.state = state
@@ -52,6 +53,10 @@ final class MenuBarController: NSObject {
         let refresh = NSMenuItem(title: "Muster Now (refresh)", action: #selector(refresh), keyEquivalent: "r")
         refresh.target = self
         menu.addItem(refresh)
+
+        let ledger = NSMenuItem(title: "War Ledger…", action: #selector(openLedger), keyEquivalent: "l")
+        ledger.target = self
+        menu.addItem(ledger)
         menu.addItem(.separator())
 
         let mockHeader = NSMenuItem(title: "Drill Yard (mock)", action: nil, keyEquivalent: "")
@@ -90,6 +95,7 @@ final class MenuBarController: NSObject {
     @objc private func toggleHUD() { onToggleHUD() }
     @objc private func openSettings() { onOpenSettings() }
     @objc private func openAbout() { onOpenAbout() }
+    @objc private func openLedger() { onOpenLedger() }
     @objc private func quit() { NSApp.terminate(nil) }
     @objc private func refresh() { Task { await state.refreshNow() } }
     @objc private func simGain() { Task { await state.simulateGain() } }

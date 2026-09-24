@@ -31,9 +31,27 @@ struct HUDView: View {
             }
             .padding(.top, 12)
 
+            if let recap = state.recapText {
+                VStack {
+                    RecapBanner(text: recap) {
+                        withAnimation(.easeOut(duration: 0.25)) { state.recapText = nil }
+                    }
+                    .padding(.top, 30)
+                    Spacer()
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .zIndex(10)
+            }
+
             MedievalFrame()
         }
         .clipShape(RoundedRectangle(cornerRadius: 10))
+        .onChange(of: state.recapText) { _ in
+            guard state.recapText != nil else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 9) {
+                withAnimation(.easeOut(duration: 0.4)) { state.recapText = nil }
+            }
+        }
     }
 
     private var header: some View {
@@ -48,6 +66,13 @@ struct HUDView: View {
                 .foregroundStyle(.white.opacity(0.6))
             Spacer()
             moraleBadge
+            Button(action: { state.onOpenLedger?() }) {
+                Image(systemName: "scroll.fill")
+                    .font(.system(size: 8))
+                    .foregroundStyle(Color(red: 0.87, green: 0.75, blue: 0.52))
+            }
+            .buttonStyle(.plain)
+            .help("War Ledger")
             Button(action: { isPaused.toggle(); state.paused = isPaused; scene.isPaused = isPaused }) {
                 Image(systemName: isPaused ? "play.fill" : "pause.fill")
                     .font(.system(size: 8))
@@ -77,6 +102,44 @@ struct HUDView: View {
         case .high: return .green
         case .exultant: return .cyan
         }
+    }
+}
+
+/// Parchment banner shown when the app becomes active after accumulating
+/// events while inactive ("+5 recruits arrived, 2 fallen in battle").
+struct RecapBanner: View {
+    let text: String
+    let dismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "scroll.fill")
+                .font(.system(size: 9))
+                .foregroundStyle(Color(red: 0.35, green: 0.24, blue: 0.12))
+            Text(text)
+                .font(.system(size: 9, weight: .semibold, design: .serif))
+                .foregroundStyle(Color(red: 0.25, green: 0.17, blue: 0.08))
+                .lineLimit(2)
+            Button(action: dismiss) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 7, weight: .bold))
+                    .foregroundStyle(Color(red: 0.40, green: 0.28, blue: 0.14))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(
+            LinearGradient(colors: [Color(red: 0.93, green: 0.84, blue: 0.62),
+                                    Color(red: 0.84, green: 0.72, blue: 0.48)],
+                           startPoint: .top, endPoint: .bottom),
+            in: RoundedRectangle(cornerRadius: 6)
+        )
+        .overlay(RoundedRectangle(cornerRadius: 6)
+            .stroke(Color(red: 0.45, green: 0.32, blue: 0.16), lineWidth: 1))
+        .shadow(color: .black.opacity(0.4), radius: 4, y: 2)
+        .padding(.horizontal, 40)
+        .onTapGesture(perform: dismiss)
     }
 }
 

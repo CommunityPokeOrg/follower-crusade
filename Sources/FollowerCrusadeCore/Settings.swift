@@ -38,6 +38,16 @@ public struct AppSettings: Codable, Equatable, Sendable {
     // Competitors / outposts
     public var competitors: [Competitor] = []
 
+    // War Ledger + "while you were away" recap
+    /// Rolling event log (joins, losses, desertions, captures).
+    public var warLedger: WarLedger = WarLedger()
+    /// When the app last went inactive (resigned active / quit). Drives the
+    /// away-recap window on the next activation.
+    public var lastInactiveAt: Date? = nil
+    /// Follower count at the last successful fetch — used to record the true
+    /// delta across an app restart instead of the whole-army muster.
+    public var lastSeenFollowers: Int? = nil
+
     public init() {}
 }
 
