@@ -8,7 +8,7 @@ import FollowerCrusadeCore
 /// the headcount and morale, the SpriteKit siege scene, and the medieval frame.
 struct HUDView: View {
     @ObservedObject var state: AppState
-    let scene: CampScene
+    let scene: SKScene
     @State private var isPaused = false
 
     var body: some View {

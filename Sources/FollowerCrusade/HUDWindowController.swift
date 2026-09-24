@@ -1,5 +1,6 @@
 #if canImport(AppKit) && canImport(SwiftUI)
 import AppKit
+import SpriteKit
 import SwiftUI
 import FollowerCrusadeCore
 
@@ -14,7 +15,7 @@ final class HUDWindowController: NSObject, NSWindowDelegate {
     private(set) var panel: NSPanel
     private let store = SettingsStore.shared
 
-    init(state: AppState, scene: CampScene) {
+    init(state: AppState, scene: SKScene) {
         panel = NSPanel(
             contentRect: NSRect(origin: .zero, size: Self.defaultSize),
             styleMask: [.borderless, .nonactivatingPanel, .resizable],

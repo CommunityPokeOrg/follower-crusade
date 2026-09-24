@@ -19,7 +19,7 @@ final class AppState: ObservableObject {
     @Published var recapText: String?
 
     let store = SettingsStore.shared
-    weak var scene: CampScene?
+    weak var scene: (any CampSceneDriving)?
     /// Wired by the app delegate to open the War Ledger window.
     var onOpenLedger: (() -> Void)?
 
