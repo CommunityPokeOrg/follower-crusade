@@ -109,7 +109,7 @@ final class AppState: ObservableObject {
             didBaseline = true
             if let prev = store.settings.lastSeenFollowers, prev != new.followerCount {
                 let delta = new.followerCount - prev
-                ledger.record(delta > 0 ? .recruitsJoined : .soldiersLost,
+                ledger.record(kind: delta > 0 ? .recruitsJoined : .soldiersLost,
                               amount: abs(delta),
                               detail: delta > 0 ? "+\(delta) recruits arrived" : "\(abs(delta)) lost to arrows",
                               at: new.fetchedAt)
