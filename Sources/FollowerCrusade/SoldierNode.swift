@@ -88,12 +88,13 @@ final class SoldierNode: SKSpriteNode {
         removeAllActions()
         let fallen = PixelArt.texture(rows: Sprites.fallen, scale: 2)
         let skull = PixelArt.texture(rows: Sprites.skull, scale: 2)
-        let impact = SKAction.group([
-            .sequence([.rotate(toAngle: -.pi / 2, duration: 0.18),
-                       .rotate(toAngle: -.pi / 2 + 0.25, duration: 0.12),
-                       .rotate(toAngle: -.pi / 2, duration: 0.1)]),
-            .moveBy(x: 4, y: -4, duration: 0.3),
+        let tipOver = SKAction.sequence([
+            .rotate(toAngle: -.pi / 2, duration: 0.18),
+            .rotate(toAngle: -.pi / 2 + 0.25, duration: 0.12),
+            .rotate(toAngle: -.pi / 2, duration: 0.1),
         ])
+        let slump = SKAction.moveBy(x: 4, y: -4, duration: 0.3)
+        let impact = SKAction.group([tipOver, slump])
         run(.sequence([
             impact,
             .setTexture(fallen),

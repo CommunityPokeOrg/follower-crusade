@@ -6,6 +6,7 @@ import FollowerCrusadeCore
 
 /// Menu bar accessory: follower count plus controls for the HUD, mock
 /// simulation, settings, about, and quit.
+@MainActor
 final class MenuBarController: NSObject {
 
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)

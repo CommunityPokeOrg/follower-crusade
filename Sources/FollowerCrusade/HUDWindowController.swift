@@ -58,7 +58,7 @@ final class HUDWindowController: NSObject, NSWindowDelegate {
             panel.setFrame(f, display: false)
             clampToVisibleScreen()
         } else if dock != .free {
-            dock(dock)
+            self.dock(dock)
         } else {
             panel.setFrameOrigin(NSPoint(x: 80, y: 80))
         }

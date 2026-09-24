@@ -4,6 +4,7 @@ import SpriteKit
 import SwiftUI
 import FollowerCrusadeCore
 
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var state: AppState!
